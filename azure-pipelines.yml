@@ -38,7 +38,7 @@ stages:
             command: 'publish'
             publishWebProjects: true
             projects: '**/*.csproj'
-            arguments: '--configuration Release --output  $(Build.ArtifactStagingDirectory)'
+            arguments: '--configuration Release --output  "$(Build.ArtifactStagingDirectory)"'
           displayName: Publish
         - task: PublishBuildArtifacts@1
           inputs:
