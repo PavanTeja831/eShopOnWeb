@@ -8,6 +8,7 @@ trigger:
 
 stages:
   - stage: Build
+    displayName: Build
     jobs:
     - job: Build
       pool: Default
@@ -39,3 +40,23 @@ stages:
             PathtoPublish: '$(Build.ArtifactStagingDirectory)'
             ArtifactName: 'RetailApp'
           displayName: Publish_Artifact
+  - stage: Deployment
+    displayName: Dev-Env
+    jobs:
+      - job: Deploy
+        pool: Default
+        steps:
+          - task: DownloadBuildArtifacts@1
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'RetailApp'
+              downloadPath: '$(Build.ArtifactStagingDirectory)'
+            displayName: Download_Artifact
+          - task: AzureRmWebAppDeployment@4
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'eshoparm'
+              appType: 'webApp'
+              WebAppName: 'infywebapps'
+              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/web.zip'
