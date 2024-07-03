@@ -81,4 +81,4 @@ stages:
               azureSubscription: 'eshoparm'
               appType: 'webApp'
               WebAppName: 'infyqaenv'
-              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/web.zip'
