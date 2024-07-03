@@ -61,19 +61,19 @@ stages:
               appType: 'webApp'
               WebAppName: 'infywebapps'
               packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
-  - stage: Deploy_QA
-    pool: Default
-    displayName: QA-Env
+  - stage: QA_Env
+    displayName: QA_Env
     jobs:
       - job: Deploy
+        pool: Default
         steps:
           - task: DownloadBuildArtifacts@1
             inputs:
               buildType: 'current'
               downloadType: 'single'
               artifactName: 'RetailApp'
-              downloadPath: '$(SBuild.ArtifactStagingDirectory)'
-            displayName: Download Artifact
+              downloadPath: '$(Build.ArtifactStagingDirectory)'
+            displayName: Download_Artifact
           - task: AzureRmWebAppDeployment@4
             displayName: Deploy_WebApp
             inputs:
