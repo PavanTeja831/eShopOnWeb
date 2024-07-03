@@ -35,6 +35,14 @@ stages:
             publishWebProjects: true
             arguments: '--configuration Release --output  "$(Build.ArtifactStagingDirectory)"'
           displayName: Publish
+        - task: ArchiveFiles@2
+          inputs:
+            rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+            includeRootFolder: false
+            archiveType: 'zip'
+            archiveFile: '$(Build.ArtifactStagingDirectory)/web.zip'
+            replaceExistingArchive: true
+          displayName: Archive Build Output
         - task: PublishBuildArtifacts@1
           inputs:
             PathtoPublish: '$(Build.ArtifactStagingDirectory)'
@@ -60,7 +68,7 @@ stages:
               azureSubscription: 'eshoparm'
               appType: 'webApp'
               WebAppName: 'infywebapps'
-              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/web.zip'
+              packageForLinux: '$(Build.ArtifactStagingDirectory)/web.zip'
   - stage: Deploy_QA
     pool: Default
     displayName: QA-Env
