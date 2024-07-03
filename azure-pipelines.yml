@@ -40,7 +40,7 @@ stages:
             rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
             includeRootFolder: false
             archiveType: 'zip'
-            archiveFile: '$(Build.ArtifactStagingDirectory)/web.zip'
+            archiveFile: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
             replaceExistingArchive: true
           displayName: Archive Build Output
         - task: PublishBuildArtifacts@1
@@ -68,7 +68,7 @@ stages:
               azureSubscription: 'eshoparm'
               appType: 'webApp'
               WebAppName: 'infywebapps'
-              packageForLinux: '$(Build.ArtifactStagingDirectory)/web.zip'
+              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
   - stage: Deploy_QA
     pool: Default
     displayName: QA-Env
@@ -89,4 +89,4 @@ stages:
               azureSubscription: 'eshoparm'
               appType: 'webApp'
               WebAppName: 'infyqaenv'
-              packageForLinux: '$(Build.ArtifactStagingDirectory)/web.zip'
+              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
