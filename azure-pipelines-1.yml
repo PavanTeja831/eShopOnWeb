@@ -1,0 +1,115 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+name: EshopCICDConditionPipeline
+trigger:
+ - master
+
+stages:
+  - stage: Build
+    displayName: Build
+    jobs:
+    - job: Build
+      pool: Default
+      steps:
+        - task: DotNetCoreCLI@2
+          inputs:
+            command: 'restore'
+            projects: '**/*.sln'
+            feedsToUse: 'select'
+          displayName: Restore
+        - task: DotNetCoreCLI@2
+          inputs:
+            command: 'build'
+            projects: '**/*.sln'
+          displayName: Build
+        - task: DotNetCoreCLI@2
+          inputs:
+            command: 'test'
+            projects: '**/UnitTests.csproj'
+          displayName: Unit_Test
+        - task: DotNetCoreCLI@2
+          inputs:
+            command: 'publish'
+            publishWebProjects: true
+            arguments: '--configuration Release --output  "$(Build.ArtifactStagingDirectory)"'
+          displayName: Publish
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+            ArtifactName: 'RetailApp'
+          displayName: Publish_Artifact
+  - stage: Deployment
+    displayName: Dev-Env
+    jobs:
+      - job: Deploy
+        pool: Default
+        steps:
+          - task: DownloadBuildArtifacts@1
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'RetailApp'
+              downloadPath: '$(Build.ArtifactStagingDirectory)'
+            displayName: Download_Artifact
+          - task: AzureRmWebAppDeployment@4
+            displayName: Deploy_WebApp
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'eshoparm'
+              appType: 'webApp'
+              WebAppName: 'infywebapps'
+              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
+  - stage: Deployment_SIT1
+    displayName: SIT1_Env
+    dependsOn: Deployment
+    jobs:
+      - deployment: Deploy
+        environment: QA_Env
+        pool: Default
+        strategy:
+         runOnce:
+           deploy:
+            steps:
+            - task: DownloadBuildArtifacts@1
+              inputs:
+                buildType: 'current'
+                downloadType: 'single'
+                artifactName: 'RetailApp'
+                downloadPath: '$(Build.ArtifactStagingDirectory)'
+              displayName: Download_Artifact
+            - task: AzureRmWebAppDeployment@4
+              displayName: Deploy_WebApp
+              inputs:
+                ConnectionType: 'AzureRM'
+                azureSubscription: 'eshoparm'
+                appType: 'webApp'
+                WebAppName: 'infyqaenv'
+                packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
+  - stage: deployment_SIT2
+    displayName: SIT2_Env
+    dependsOn: Deployment
+    jobs:
+      - deployment: Deploy
+        environment: QA_Env
+        pool: Default
+        strategy:
+         runOnce:
+           deploy:
+            steps:
+            - task: DownloadBuildArtifacts@1
+              inputs:
+                buildType: 'current'
+                downloadType: 'single'
+                artifactName: 'RetailApp'
+                downloadPath: '$(Build.ArtifactStagingDirectory)'
+              displayName: Download_Artifact
+            - task: AzureRmWebAppDeployment@4
+              displayName: Deploy_WebApp
+              inputs:
+                ConnectionType: 'AzureRM'
+                azureSubscription: 'eshoparm'
+                appType: 'webApp'
+                WebAppName: 'infyqaenv'
+                packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
