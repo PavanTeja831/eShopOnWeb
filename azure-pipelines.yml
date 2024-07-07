@@ -64,21 +64,25 @@ stages:
   - stage: QA_Env
     displayName: QA_Env
     jobs:
-      - job: Deploy
+      - deployment: Deploy
+        environment: QA_Env
         pool: Default
-        steps:
-          - task: DownloadBuildArtifacts@1
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'RetailApp'
-              downloadPath: '$(Build.ArtifactStagingDirectory)'
-            displayName: Download_Artifact
-          - task: AzureRmWebAppDeployment@4
-            displayName: Deploy_WebApp
-            inputs:
-              ConnectionType: 'AzureRM'
-              azureSubscription: 'eshoparm'
-              appType: 'webApp'
-              WebAppName: 'infyqaenv'
-              packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
+        strategy:
+         runOnce:
+           deploy:
+            steps:
+            - task: DownloadBuildArtifacts@1
+              inputs:
+                buildType: 'current'
+                downloadType: 'single'
+                artifactName: 'RetailApp'
+                downloadPath: '$(Build.ArtifactStagingDirectory)'
+              displayName: Download_Artifact
+            - task: AzureRmWebAppDeployment@4
+              displayName: Deploy_WebApp
+              inputs:
+                ConnectionType: 'AzureRM'
+                azureSubscription: 'eshoparm'
+                appType: 'webApp'
+                WebAppName: 'infyqaenv'
+                packageForLinux: '$(Build.ArtifactStagingDirectory)/**/Web.zip'
