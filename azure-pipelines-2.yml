@@ -21,4 +21,38 @@ stages:
           projects: '**/*.sln'
           feedsToUse: 'select'
         displayName: Restore
-      
+      - task: SonarCloudPrepare@2
+        inputs:
+          SonarCloud: 'sonarCloud'
+          organization: 'infydev'
+          scannerMode: 'MSBuild'
+          msBuildVersion: 'MSBuild'
+          projectKey: 'infydev_infosys'
+          projectName: 'infosys'
+        displayName: Static code analysis
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'build'
+          projects: '**/*.sln'
+        displayName: Build
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'test'
+          projects: '**/UnitTests.csproj'
+        displayName: Unit Testing
+      - task: SonarCloudAnalyze@2
+      - task: SonarCloudPublish@2
+        inputs:
+          pollingTimeoutSec: '300'
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'publish'
+          publishWebProjects: true
+          arguments: '--configuration Release --output "$(Build.ArtifactStagingDirectory)"'
+        displayName: Publish
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'RetailApp'
+          publishLocation: 'Container'
+        displayName: Publish Artifact
